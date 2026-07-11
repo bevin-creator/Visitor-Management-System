@@ -6,7 +6,7 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     #App metadata
     APP_NAME: str = "Visitors Management System"
-    DEBUG: bool = false
+    DEBUG: bool = False
 
     #Database - SQLAlchemy connection string format
     DATABASE_URL: str ="postgresql://postgres:postgres@localhost:5432/visitor_management"
@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
     #CORS for frontend origin
-    CORSE_ORIGIN:list[str]= ["http://localhost:5500", "http://127.0.0.1:5500"]
+    CORS_ORIGINS:list[str]= ["http://localhost:5500", "http://127.0.0.1:5500"]
 
     class Config:
         env_file=".env"
