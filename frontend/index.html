@@ -3,7 +3,7 @@
 <head>
     <meta charset= "UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visitor Management System</title>
+    <title>VMS - Dashboard</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -16,19 +16,37 @@
             <li><a href="index.html">Home</a></li>
             <li><a href="visitors.html">Visitors</a></li>
             <li><a href="register.html">Register</a></li>
+            <li><a href="#" id="logout-btn"></a></li>
         </ul>
     </nav>
 
     <main>
         <section id="dashboard">
             <h2>Dashboard</h2>
-            <p>Welcome to the Visitor Management System</p>
+            <div class="stats">
+                <div class="stat-card">
+                    <h3>Today</h3>
+                    <p id="visitors-today">0</p>
 
+                </div>
+                <div class="stat-card">
+                    <h3>Currently In</h3>
+                    <p id="checked-in">0</p>
+
+                </div>
+                <div class="stat-card">
+                    <h3>This Week</h3>
+                    <p id="visitors-week">0</p>
+
+                </div>
+
+            </div>
         </section>
 
         <aside>
-            <h3>Quick Stats</h3>
-            <p>Total visitors today: <span id="visitor-count">0</span></p>
+            <h3>Quick Actions</h3>
+            <p><a href="register.html">Register New Visitor</a></p>
+            <p><a href="visitors.html">View All Visitors</a></p>
         </aside>
 
     </main>
@@ -38,6 +56,31 @@
     </footer>
 
     <script src="js/main.js"></script>
+    <script>
+        requireAuth();
+
+        //load dashboard metrics
+        async function loadDashboard() {
+            const response = await apiRequest("/dashboard/metrics");
+            
+            if(response && response.ok){
+                const data = await response.json();
+                document.getElementById("visitors-today").textContent = data.visitors_today;
+                document.getElementById("checked-in").textContent=data.currently_checked_in;
+                document.getElementById("visitors-week").textContent=data.visitors_this_week;
+
+            }
+        }
+        //logout
+        document.getElementById("logout-btn").addEventListener("click", (e)=>{
+            e.preventDefault();
+            clearToken();
+            window.location.href="login.html";
+        });
+
+        loadDashboard();
+
+    </script>
 
 </body>
 </html>
