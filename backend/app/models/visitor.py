@@ -15,6 +15,9 @@ class Visitor(Base):
     full_name: Mapped[str]=mapped_column(String(100), index=True)
     email: Mapped[str]= mapped_column(String(100), nullable=True, index=True)
     phone: Mapped[str]=mapped_column(String(20))
+    company: Mapped[Optional[str]]=mapped_column(String(100), nullable=True)
+    id_type: Mapped[Optional[str]]=mapped_column(String(50), nullable=True)
+    id_number: Mapped[Optional[str]]=mapped_column(String(50), nullable=True)
 
     #timespamps and r/ship
     created_at: Mapped[datetime]=mapped_column(DateTime, server_default=func.now())
@@ -40,7 +43,7 @@ class VisitRecord(Base):
 
     #Notes & audit fields
     notes: Mapped[Optional[str]]=mapped_column(Text, nullable=True)
-    check_in_by: Mapped[Optional[int]]=mapped_column(ForeignKey("users.id"), nullable=True)
-    check_out_by: Mapped[Optional[int]]=mapped_column(ForeignKey("users.id"), nullable=True)
+    checked_in_by: Mapped[Optional[int]]=mapped_column(ForeignKey("users.id"), nullable=True)
+    checked_out_by: Mapped[Optional[int]]=mapped_column(ForeignKey("users.id"), nullable=True)
 
     visitor: Mapped["Visitor"]=relationship(back_populates="visits")
