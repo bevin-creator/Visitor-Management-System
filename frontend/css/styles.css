@@ -138,3 +138,29 @@ button[type="submit"]:hover{
         gap: 0.5rem;
     }
 }
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.stat-card {
+    background-color: #e8f5e9;
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid #2e7d32;
+}
+
+.stat-card h3 {
+    color: #2e7d32;
+    margin-bottom: 0.5rem;
+}
+
+.stat-card p{
+    font-size: 2rem;
+    font-weight: bold;
+    color: #1a1a1a;
+}
