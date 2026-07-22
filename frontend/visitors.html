@@ -16,6 +16,7 @@
             <li><a href="index.html">Home</a></li>
             <li><a href="visitors.html">Visitors</a></li>
             <li><a href="register.html">Register</a></li>
+            <li><a href="#" id="logout-btn">Logout</a></li>
         </ul>
     </nav>
 
@@ -25,16 +26,18 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Name</th>
+                        <th>Visitor ID</th>
                         <th>Purpose</th>
-                        <th>Check-in</th>
-                        <th>Status</th>
+                        <th>Host</th>
+                        <th>Check-in Time</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
-                <tbody id="Visitors-table-body">
+                <tbody id="visitors-table-body">
                         <!--rows-->
                 </tbody>
             </table>
+            <p id="no-visitors" style="display:none;">No active visitors.</p>
             
 
         </section>
@@ -51,6 +54,62 @@
     </footer>
 
     <script src="js/main.js"></script>
+    <script>
+        requireAuth();
+        async function loadActiveVisitors(){
+            const response = await apiRequest("/checkin/active");
+            if (!response || !response.ok)return;
+
+            const visits = await response.json();
+            const tbody = document.getElementById("visitors-table-body");
+            const noVisitors = document.getElementById("no-visitors");
+
+            tbody.innerHTML="";
+
+            if (visits.length ===0) {
+                noVisitors.style.display="block";
+                return;
+            }
+
+            noVisitors.style.display="none";
+
+            for (const visit of visits){
+                const row = document.createElement("tr");
+                const checkInTime = new Date(visit.check_in_time).toLocaleString();
+
+                row.innerHTML = `
+                    <td>${visit.visitor_id}</td>
+                    <td>${visit.purpose}</td>
+                    <td>${visit.host_name}</td>
+                    <td>${checkInTime}</td>
+                    <td><button onclick = "checkOut(${visit.id})">Check Out</button></td>
+                `;
+                tbody.appendChild(row);
+            }
+        }
+
+        async function checkOut(visitRecordId) {
+            const response = await apiRequest("/checkin/checkout", "POST", {
+                visit_record_id: visitRecordId,
+
+            });
+
+            if (response && response.ok){
+                loadActiveVisitors();
+            }else{
+                alert("Check-out failed!")
+            }
+            
+        }
+        //logout
+        document.getElementById("logout-btn").addEventListener("click", (e)=>{
+            e.preventDefault();
+            clearToken();
+            window.location.href = "login.html";
+        });
+
+        loadActiveVisitors();
+    </script>
 
 </body>
 </html>
