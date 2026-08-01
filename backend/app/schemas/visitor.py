@@ -61,3 +61,22 @@ class CheckInRequest(BaseModel):
 class CheckOutRequest(BaseModel):
     visit_record_id: int
     notes: Optional[str]=None
+
+class VisitRecordWithVisitor(BaseModel):
+    id: int
+    visitor_id: int
+    purpose: str
+    host_name: str
+    host_department: Optional[str]=None
+    badge_number: Optional[str]=None
+    check_in_time: datetime
+    check_out_time: Optional[datetime]=None
+    notes: Optional[str]=None
+    visitor_name: str
+    visitor_email: str
+    visitor_phone: str
+    visitor_id_type: Optional[str]=None
+    visitor_id_number: Optional[str]=None
+
+    class Config:
+        from_attributes=True
