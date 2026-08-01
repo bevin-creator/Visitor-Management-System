@@ -26,7 +26,9 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Visitor ID</th>
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>ID</th>
                         <th>Purpose</th>
                         <th>Host</th>
                         <th>Check-in Time</th>
@@ -76,9 +78,14 @@
             for (const visit of visits){
                 const row = document.createElement("tr");
                 const checkInTime = new Date(visit.check_in_time).toLocaleString();
+                const idInfo = visit.visitor_id_type
+                    ?`${visit.visitor_id_type}: ${visit.visitor_id_number || ""}`
+                    : "N/A";
 
                 row.innerHTML = `
-                    <td>${visit.visitor_id}</td>
+                    <td>${visit.visitor_name}</td>
+                    <td>${visit.visitor_phone}</td>
+                    <td>${idInfo}</td>
                     <td>${visit.purpose}</td>
                     <td>${visit.host_name}</td>
                     <td>${checkInTime}</td>
