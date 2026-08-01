@@ -62,16 +62,52 @@ async def check_out_visitor(
     db.refresh(visit_record)
     return visit_record
 
+#helper function to mask ID basde on rol
+def mask_id_number(id_number, role):
+    if not id_number:
+        return None
+    if role=="admin":
+        return id_number
+    elif role=="manager":
+        return "*" * (len(id_number)-4)+ id_number[-4:]
+    else:
+        return "********"
 
-#list active visitors
-@router.get("/active", response_model=list[VisitRecordResponse])
+#list active visitors with full info
+@router.get("/active")
 async def get_active_visits(
     db: Session=Depends(get_db),
     current_user: User=Depends(get_current_user),
 ):
-    return(
+    from app.models.visitor import Visitor
+
+    visits = (
         db.query(VisitRecord)
         .filter(VisitRecord.check_out_time.is_(None))
         .order_by(VisitRecord.check_in_time.desc())
         .all()
     )
+    results =[]
+    for visit in visits:
+        visitor = db.query(Visitor).filter(Visitor.id==visit.visitor_id).first()
+        results.append({
+            
+            "id": visit.id,
+            "visitor_id": visit.visitor_id,
+            "purpose": visit.purpose,
+            "host_name": visit.host_name,
+            "host_department": visit.host_department,
+            "badge_number": visit.badge_number,
+            "check_in_time": visit.check_in_time,
+            "check_out_time": visit.check_out_time,
+            "notes": visit.notes,
+            "visitor_name": visitor.full_name if visitor else "Unknown",
+            "visitor_email": visitor.email if visitor else "",
+            "visitor_phone": visitor.phone if visitor else "",
+            "visitor_id_type": visitor.id_type if visitor else None,
+            "visitor_id_number": mask_id_number(
+                visitor.id_number, current_user.role
+            ) if visitor else None,
+
+        })
+    return results
