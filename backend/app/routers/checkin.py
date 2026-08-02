@@ -10,6 +10,8 @@ from app.models.user import User
 from app.models.visitor import VisitRecord
 from app.routers.auth import get_current_user
 from app.schemas.visitor import CheckInRequest, CheckOutRequest, VisitRecordResponse
+from app.services.audit import log_action
+
 
 router = APIRouter()
 
@@ -33,6 +35,10 @@ async def check_in_visitor(
     db.add(visit_record)
     db.commit()
     db.refresh(visit_record)
+
+    #auditlogging via audit service
+    log_action(db, action="checkin", resource_type="visit_record", user_id=current_user.id, resource_id=visit_record.id, details=f"Checked in visitor {checkin_data.visitor_id}")
+
     return visit_record
 
 
@@ -60,7 +66,12 @@ async def check_out_visitor(
 
     db.commit()
     db.refresh(visit_record)
+
+    #auditlogging via audit service
+    log_action(db, action="checkout", resource_type="visit_record", user_id=current_user.id, resource_id=visit_record.id, details=f"Checked out visitor {visit_record.visitor_id}")
+
     return visit_record
+
 
 #helper function to mask ID basde on rol
 def mask_id_number(id_number, role):
