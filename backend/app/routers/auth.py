@@ -95,6 +95,9 @@ async def login (
         access_token=access_token, role=user.role, username=user.username
     )
 
+    #log via audit service
+    log_action(db, action="login", resource_type="user", user_id=user.id, details=f"User {user.username} logged in")
+
 
 #register route (admin only)
 @router.post("/register", response_model=UserResponse)
