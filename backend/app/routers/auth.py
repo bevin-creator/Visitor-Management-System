@@ -12,6 +12,7 @@ from app.config import settings
 from app.database import get_db
 from app.models.user import User
 from app.schemas.user import Token, TokenData, UserCreate, UserResponse
+from app.services.audit import log_action
 
 
 router = APIRouter()
@@ -91,12 +92,13 @@ async def login (
         expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
 
     )
+
+    #auditlogging via audit service
+    log_action(db, action="login", resource_type="user", user_id=user.id, details=f"User {user.username} logged in")
+
     return Token(
         access_token=access_token, role=user.role, username=user.username
     )
-
-    #log via audit service
-    log_action(db, action="login", resource_type="user", user_id=user.id, details=f"User {user.username} logged in")
 
 
 #register route (admin only)
@@ -123,6 +125,10 @@ async def register_user(
     db.add(user)
     db.commit()
     db.refresh(user)
+
+    #auditlogging via audit service
+    log_action(db, action="create", resource_type="user", user_id=current_user.id, resource_id=user.id, details=f"Createed user {user.username} with role {user.role}")
+
     return user
 
 
