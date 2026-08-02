@@ -10,6 +10,8 @@ from app.models.user import User
 from app.models.visitor import Visitor
 from app.routers.auth import get_current_user
 from app.schemas.visitor import VisitorCreate, VisitorResponse
+from app.services.audit import log_action
+
 
 router = APIRouter()
 
@@ -45,6 +47,11 @@ async def create_visitor(
     db.add(visitor)
     db.commit()
     db.refresh(visitor)
+
+    #auditlogging via audit service
+    log_action(db, action="create", resource_type="visitor", user_id=current_user.id, resource_id=visitor.id, details=f"Registered visitor {visitor.full_name}")
+
+
     return visitor
 
 
@@ -55,11 +62,11 @@ async def get_visitor(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    Visitor = db.query(Visitor).filter(Visitor.id == visitor_id).first()
+    visitor = db.query(Visitor).filter(Visitor.id == visitor_id).first()
     
-    if not Visitor:
+    if not visitor:
         raise HTTPException(status_code=404, detail="Visitor not found")
-    return Visitor
+    return visitor
 
 
 #Updating visitor record
