@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VMS - Reports</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Visitor Management System</h1>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html">Dashboard</a></li>
+            <li><a href="visitors.html">Visitors</a></li>
+            <li><a href="register.html">Register</a></li>
+            <li><a href="reports.html">Reports</a></li>
+            <li><a href="#" id="logout-btn">Logout</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="reports">
+            <h2>Visit Reports</h2>
+            <form id="report-form">
+                <label for="start_date">Start Date:</label>
+                <input type="date" id="start_date" required>
+
+                <label for="end_date">End Date:</label>
+                <input type="date" id="end_date" required>
+
+                <button type="submit">Generate Report</button>
+            </form>
+
+            <div id="report-results" style="display:none; margin-top:1.5rem;">
+                <h3>Summary</h3>
+                <p>Total Visits: <strong id="total-visits">0</strong></p>
+                <p>Unique Visitors: <strong id="unique-visitors">0</strong></p>
+
+                <h3>Purpose Breakdown</h3>
+                <ul id="purpose-list"></ul>
+
+            </div>
+
+            <p id="report-error" class="error"></p>
+        </section>
+
+        <aside>
+            <h3>info</h3>
+            <p>Reports are available to admins and managers only</p>
+        </aside>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Visitor Management System. All rights reserved.</p>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script>
+        requireAuth();
+
+        document.getElementById("report-form").addEventListener("submit", async (e)=>{
+            e.preventDefault();
+            const errorE1 = document.getElementById("report-error");
+            const resultsE1 = document.getElementById("report-results");
+            errorE1.textContent="";
+            resultsE1.style.display="none";
+
+            const startDate = document.getElementById("start_date").value;
+            const endDate = document.getElementById("end_date").value;
+
+            const response = await apiRequest(
+                `/reports/summary?start_date=${startDate}&end_date=${endDate}`
+            );
+
+            if (!response) return;
+
+            if (response.status===403){
+                errorE1.textContent="Access denied. Reports are for admins and managers only!";
+                return;
+            }
+            if (!response.ok){
+                errorE1.textContent="Failed to generate report.";
+                return;
+            }
+
+            const data = await response.json();
+
+            document.getElementById("total-visits").textContent=data.total_visits;
+            document.getElementById("unique-visitors").textContent= data.unique_visitors;
+
+            const purposeList = document.getElementById("purpose-list");
+            purposeList.innerHTML="";
+            for (const [purpose, count] of Object.entries(data.purpose_breakdown)){
+                const li = document.createElement("li");
+                li.textContent=`${purpose}: ${count}`;
+                purposeList.appendChild(li);
+            }
+
+            resultsE1.style.display="block";
+        });
+
+        document.getElementById("logout-btn").addEventListener("click", (e)=>{
+            e.preventDefault();
+            clearToken();
+            window.location.href="login.html";
+        });
+
+
+    </script>
+</body>
+</html>
