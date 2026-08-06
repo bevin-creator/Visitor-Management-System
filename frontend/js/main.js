@@ -72,11 +72,11 @@ function getUserRole(){
     return localStorage.getItem("user_role");
 }
 
-//hide elements that don't apply to the current user's role
+//hiding elements that don't apply to the current user's role
 function applyRoleVisibility(){
     const role = getUserRole();
 
-    //guards can't access reports - hide the link
+    
     if(role === "guard"){
         const reportsLink = document.querySelector('a[href="reports.html"]');
         if(reportsLink) reportsLink.parentElement.style.display = "none";
