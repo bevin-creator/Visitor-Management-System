@@ -18,6 +18,8 @@ class Settings(BaseSettings):
 
     #CORS for frontend origin
     CORS_ORIGINS:list[str]= ["http://localhost:5500", "http://127.0.0.1:5500"]
+    
+    ENCRYPTION_KEY: str = "generate-key"
 
     class Config:
         env_file=".env"
