@@ -7,11 +7,10 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.user import User
-from app.models.visitor import Visitor
-from app.routers.auth import get_current_user
+from app.models.visitor import Visitor, VisitRecord
 from app.schemas.visitor import VisitorCreate, VisitorResponse
 from app.services.audit import log_action
-
+from app.routers.auth import get_current_user, require_role
 
 router = APIRouter()
 
@@ -90,5 +89,28 @@ async def update_visitor(
     db.refresh(visitor)
     return visitor
 
+#Delete visitor (require admin role)
+@router.delete("/{visitor_id}", status_code=204)
+async def delete_visitor(
+    visitor_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_role("admin")),
+
+):
+
+    visitor = db.query(Visitor).filter(Visitor.id == visitor_id).first()
+
+    if not visitor:
+        raise HTTPException(status_code=404, detail="Visitor not found")
+
+    #remove all visit records for the visitor first
+    db.query(VisitRecord).filter(VisitRecord.visitor_id == visitor_id).delete()
+    db.delete(visitor)
+    db.commit()
+
+    #audit logging
+    log_action(db, action="delete", resource_type="visitor", user_id=current_user.id, resource_id=visitor_id, details=f"Deleted visitor {visitor.full_name} and all visit records")
+
+    return None
 
 
