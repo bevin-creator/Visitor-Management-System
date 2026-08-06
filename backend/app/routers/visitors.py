@@ -12,6 +12,8 @@ from app.schemas.visitor import VisitorCreate, VisitorResponse
 from app.services.audit import log_action
 from app.routers.auth import get_current_user, require_role
 
+from app.services.encryption import encrypt_field, decrypt_field
+
 router = APIRouter()
 
 #listing visitors + search capability
@@ -32,8 +34,16 @@ async def list_visitors(
             | Visitor.email.ilike(search_filter)
             | Visitor.phone.ilike(search_filter)
         )
+    visitors = query.offset(skip).limit(limit).all()
 
-    return query.offset(skip).limit(limit).all()
+    #decrypt
+    for v in visitors:
+        if v.phone:
+            v.phone = decrypt_field(v.phone)
+        if v.id_number:
+            v.id_number = decrypt_field(v.id_number)
+
+    return visitors
 
 #creatin a visitor
 @router.post("/", response_model=VisitorResponse, status_code=201)
@@ -43,9 +53,21 @@ async def create_visitor(
     current_user: User = Depends(get_current_user),
 ):
     visitor = Visitor(**visitor_data.model_dump())
+
+    #encrypt before saving
+    if visitor.phone:
+        visitor.phone = encrypt_field(visitor.phone)
+    if visitor.id_number:
+        visitor.id_number = encrypt_field(visitor.id_number)
+
     db.add(visitor)
     db.commit()
     db.refresh(visitor)
+
+    if visitor.phone:
+        visitor.phone = decrypt_field(visitor.phone)
+    if visitor.id_number:
+        visitor.id_number = decrypt_field(visitor.id_number)
 
     #auditlogging via audit service
     log_action(db, action="create", resource_type="visitor", user_id=current_user.id, resource_id=visitor.id, details=f"Registered visitor {visitor.full_name}")
@@ -65,6 +87,12 @@ async def get_visitor(
     
     if not visitor:
         raise HTTPException(status_code=404, detail="Visitor not found")
+
+    if visitor.phone:
+        visitor.phone = decrypt_field(visitor.phone)
+    if visitor.id_number:
+        visitor.id_number = decrypt_field(visitor.id_number)
+
     return visitor
 
 
