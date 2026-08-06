@@ -16,6 +16,7 @@
             <li><a href="index.html">Home</a></li>
             <li><a href="visitors.html">Visitors</a></li>
             <li><a href="register.html">Register</a></li>
+            <li><a href="reports.html">Reports</a></li>
             <li><a href="#" id="logout-btn">Logout</a></li>
         </ul>
     </nav>
@@ -91,7 +92,10 @@
                     <td>${visit.purpose}</td>
                     <td>${visit.host_name}</td>
                     <td>${checkInTime}</td>
-                    <td><button onclick = "checkOut(${visit.id})">Check Out</button></td>
+                    <td>
+                        <button onclick="checkOut(${visit.id})">Check Out</button>
+                        ${getUserRole() === "admin" ? `<button onclick="deleteVisitor(${visit.visitor_id})" style="background:red;color:white;margin-left:0.5rem;">Delete</button>` : ""}
+                    </td>
                 `;
                 tbody.appendChild(row);
             }
@@ -109,6 +113,19 @@
                 alert("Check-out failed!")
             }
             
+        }
+
+        //delete visitor - admin only, removes visitor and all visit records
+        async function deleteVisitor(visitorId) {
+            if (!confirm("Delete this visitor and all their records? This cannot be undone.")) return;
+
+            const response = await apiRequest(`/visitors/${visitorId}`, "DELETE");
+
+            if (response && response.status === 204) {
+                loadActiveVisitors();
+            } else {
+                alert("Delete failed.");
+            }
         }
         //logout
         document.getElementById("logout-btn").addEventListener("click", (e)=>{
