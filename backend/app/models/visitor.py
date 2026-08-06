@@ -47,3 +47,4 @@ class VisitRecord(Base):
     checked_out_by: Mapped[Optional[int]]=mapped_column(ForeignKey("users.id"), nullable=True)
 
     visitor: Mapped["Visitor"]=relationship(back_populates="visits")
+
