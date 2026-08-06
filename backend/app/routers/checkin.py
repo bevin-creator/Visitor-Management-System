@@ -12,6 +12,8 @@ from app.routers.auth import get_current_user
 from app.schemas.visitor import CheckInRequest, CheckOutRequest, VisitRecordResponse
 from app.services.audit import log_action
 
+from app.services.encryption import decrypt_field
+
 
 router = APIRouter()
 
@@ -114,10 +116,10 @@ async def get_active_visits(
             "notes": visit.notes,
             "visitor_name": visitor.full_name if visitor else "Unknown",
             "visitor_email": visitor.email if visitor else "",
-            "visitor_phone": visitor.phone if visitor else "",
+            "visitor_phone": decrypt_field(visitor.phone) if visitor else "",
             "visitor_id_type": visitor.id_type if visitor else None,
             "visitor_id_number": mask_id_number(
-                visitor.id_number, current_user.role
+                decrypt_field(visitor.id_number), current_user.role
             ) if visitor else None,
 
         })
