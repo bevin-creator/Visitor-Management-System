@@ -60,6 +60,7 @@
     <script src="js/main.js"></script>
     <script>
         requireAuth();
+        applyRoleVisibility();
 
         document.getElementById("report-form").addEventListener("submit", async (e)=>{
             e.preventDefault();

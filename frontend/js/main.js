@@ -11,9 +11,10 @@ function getToken(){
     return localStorage.getItem("access_token");
 }
 
-//remove token(logout)
+//remove token and role (logout) - clears everything so next user starts fresh
 function clearToken(){
     localStorage.removeItem("access_token");
+    localStorage.removeItem("user_role");
 }
 
 //authenticating api request
@@ -63,5 +64,21 @@ async function login (username, password){
 function requireAuth(){
     if(!getToken()){
         window.location.href="login.html";
+    }
+}
+
+//get the logged-in user's role - used to show/hide UI elements per role
+function getUserRole(){
+    return localStorage.getItem("user_role");
+}
+
+//hide elements that don't apply to the current user's role
+function applyRoleVisibility(){
+    const role = getUserRole();
+
+    //guards can't access reports - hide the link
+    if(role === "guard"){
+        const reportsLink = document.querySelector('a[href="reports.html"]');
+        if(reportsLink) reportsLink.parentElement.style.display = "none";
     }
 }

@@ -78,6 +78,7 @@
     <script src="js/main.js"></script>
     <script>
         requireAuth();
+        applyRoleVisibility();
 
         document.getElementById("register-form").addEventListener("submit", async (e) => {
             e.preventDefault();

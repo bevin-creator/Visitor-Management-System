@@ -13,6 +13,7 @@
 
     <main>
         <section id="login-section">
+            <img src="images/key.jpg" alt="Golden key representing secure access" style="width: 90px; display: block; margin: 0 auto 0.5rem;">
             <h2>Login</h2>
             <form id="login-form">
                 <label for="username">Username:</label>
@@ -48,6 +49,8 @@
             if (response.ok){
                 const data = await response.json();
                 saveToken(data.access_token);
+                //store the role so pages can show/hide elements based on permissions
+                localStorage.setItem("user_role", data.role);
                 window.location.href = "index.html";
             }else{
                 errorEl.textContent="Invalid username or password";

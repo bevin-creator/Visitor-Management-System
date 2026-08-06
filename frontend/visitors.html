@@ -58,6 +58,8 @@
     <script src="js/main.js"></script>
     <script>
         requireAuth();
+        applyRoleVisibility();
+
         async function loadActiveVisitors(){
             const response = await apiRequest("/checkin/active");
             if (!response || !response.ok)return;
