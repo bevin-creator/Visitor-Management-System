@@ -48,33 +48,36 @@ def decrypt_field(ciphertext: str) -> str:
     if not ciphertext:
         return ciphertext
 
-    enc_key, hmac_key = get_keys()
+    try:
 
-    raw = base64.b64decode(ciphertext.encode())
+        enc_key, hmac_key = get_keys()
 
-    #split 32bytes hmac, next 16 iv and the rest encrypted data
-    stored_mac = raw[:32]
-    payload = raw[32:]
-    iv = payload[:16]
-    encrypted_data = payload[16:]
+        raw = base64.b64decode(ciphertext.encode())
 
-    #verify hmac
-    computed_mac = hmac.new(hmac_key, payload, hashlib.sha256).digest()
-    if not hmac.compare_digest(stored_mac, computed_mac):
-        raise ValueError("Data integrity check failed!")
+        #split 32bytes hmac, next 16 iv and the rest encrypted data
+        stored_mac = raw[:32]
+        payload = raw[32:]
+        iv = payload[:16]
+        encrypted_data = payload[16:]
 
-    #decrypt with AES-256-CBC
-    cipher = Cipher(algorithms.AES(enc_key), modes.CBC(iv))
-    decryptor = cipher.decryptor()
-    padded_data = decryptor.update(encrypted_data)+decryptor.finalize()
+        #verify hmac
+        computed_mac = hmac.new(hmac_key, payload, hashlib.sha256).digest()
+        if not hmac.compare_digest(stored_mac, computed_mac):
+            raise ValueError("Data integrity check failed!")
 
-    #remove padding
-    unpadder = padding.PKCS7(128).unpadder()
-    plaintext = unpadder.update(padded_data)+unpadder.finalize()
+        #decrypt with AES-256-CBC
+        cipher = Cipher(algorithms.AES(enc_key), modes.CBC(iv))
+        decryptor = cipher.decryptor()
+        padded_data = decryptor.update(encrypted_data)+decryptor.finalize()
+
+        #remove padding
+        unpadder = padding.PKCS7(128).unpadder()
+        plaintext = unpadder.update(padded_data)+unpadder.finalize()
 
 
-    return plaintext.decode()
-
+        return plaintext.decode()
+    except Exception:
+        return ciphertext # added in case of stored plain text data stored without encryption
 
 #not sure if this is the right approach.
 
