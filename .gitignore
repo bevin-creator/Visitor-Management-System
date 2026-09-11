@@ -1,4 +1,3 @@
-# ==================== Python ====================
 __pycache__/
 *.py[cod]
 *$py.class
@@ -23,13 +22,13 @@ env/
 .env.*
 !.env.example
 
-# ==================== Node/JS ====================
+#Node/JS 
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# ==================== General ====================
+#  General
 *.log
 .DS_Store
 Thumbs.db
