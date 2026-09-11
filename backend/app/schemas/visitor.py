@@ -21,10 +21,30 @@ class VisitorResponse(BaseModel):
     company: Optional[str]= None
     id_type: Optional[str] = None
     id_number: Optional[str] = None
+    #id verification status, not_configured until the api is set up
+    verification_status: Optional[str] = None
+    verification_checked_at: Optional[datetime] = None
     created_at: datetime
 
     class Config:
         from_attributes = True
+
+
+#request/response for the verify-id endpoint
+class VerifyIdRequest(BaseModel):
+    #verify an existing visitor by id, or pass raw details directly
+    visitor_id: Optional[int] = None
+    id_type: Optional[str] = None
+    id_number: Optional[str] = None
+    full_name: Optional[str] = None
+
+
+class VerifyIdResponse(BaseModel):
+    status: str
+    provider: Optional[str] = None
+    detail: str
+    checked_at: str
+    visitor_id: Optional[int] = None
 
 
 class VisitRecordCreate(BaseModel):

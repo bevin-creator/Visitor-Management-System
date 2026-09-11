@@ -1,5 +1,6 @@
 #Visitor management routes, CRUD and search operations
 
+from datetime import datetime
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -13,6 +14,7 @@ from app.services.audit import log_action
 from app.routers.auth import get_current_user, require_role
 
 from app.services.encryption import encrypt_field, decrypt_field, blind_index
+from app.services import id_verification
 
 router = APIRouter()
 
@@ -57,6 +59,15 @@ async def create_visitor(
 ):
     visitor = Visitor(**visitor_data.model_dump())
 
+    #run id verification while we still have the plaintext id number, this never blocks registration
+    verification = id_verification.verify_id(
+        id_type=visitor.id_type,
+        id_number=visitor.id_number,
+        full_name=visitor.full_name,
+    )
+    visitor.verification_status = verification["status"]
+    visitor.verification_checked_at = datetime.utcnow()
+
     #encrypt before saving
     if visitor.phone:
         visitor.phone_bidx = blind_index(visitor.phone)
@@ -75,7 +86,7 @@ async def create_visitor(
         visitor.id_number = decrypt_field(visitor.id_number)
 
     #auditlogging via audit service
-    log_action(db, action="create", resource_type="visitor", user_id=current_user.id, resource_id=visitor.id, details=f"Registered visitor {visitor.full_name}")
+    log_action(db, action="create", resource_type="visitor", user_id=current_user.id, resource_id=visitor.id, details=f"Registered visitor {visitor.full_name} (id verification: {visitor.verification_status})")
 
 
     return visitor

@@ -22,6 +22,11 @@ class Settings(BaseSettings):
     
     ENCRYPTION_KEY: str = "generate-key"
 
+    #id verification api (optional), leave blank to keep it off, returns not_configured then
+    ID_VERIFICATION_API_URL: str = ""
+    ID_VERIFICATION_API_KEY: str = ""
+    ID_VERIFICATION_TIMEOUT_SECONDS: float = 10.0
+
     #first admin bootstrap
     ADMIN_USERNAME: str = ""
     ADMIN_PASSWORD: str = ""

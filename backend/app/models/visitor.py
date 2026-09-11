@@ -21,6 +21,10 @@ class Visitor(Base):
     id_number: Mapped[Optional[str]]=mapped_column(String(50), nullable=True)
     id_number_bidx: Mapped[Optional[str]]=mapped_column(String(64), nullable=True, index=True)
 
+    #id verification, defaults to not_configured until the api var is set, doesnt block anything
+    verification_status: Mapped[Optional[str]]=mapped_column(String(20), nullable=True, default="not_configured")
+    verification_checked_at: Mapped[Optional[datetime]]=mapped_column(DateTime, nullable=True)
+
     #timespamps and r/ship
     created_at: Mapped[datetime]=mapped_column(DateTime, server_default=func.now())
     visits: Mapped[list["VisitRecord"]]=relationship(back_populates="visitor")

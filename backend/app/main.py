@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.routers import auth, visitors, checkin, reports, dashboard
+from app.routers import auth, visitors, checkin, reports, dashboard, verification
 
 from app.database import Base, engine, SessionLocal
 from app import models
@@ -58,6 +58,7 @@ app.include_router(visitors.router, prefix="/api/v1/visitors", tags=["Visitors"]
 app.include_router(checkin.router, prefix="/api/v1/checkin", tags=["Check-In/Out"])
 app.include_router(reports.router, prefix="/api/v1/reports", tags=["Reports"])
 app.include_router(dashboard.router, prefix="/api/v1/dashboard", tags=["Dashboard"])
+app.include_router(verification.router, prefix="/api/v1/verification", tags=["ID Verification"])
 
 @app.get("/", tags=["Root"])
 async def root():
