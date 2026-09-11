@@ -82,3 +82,19 @@ def decrypt_field(ciphertext: str) -> str:
 #not sure if this is the right approach.
 
 
+def get_blind_index_key():
+    master = settings.ENCRYPTION_KEY.encode()
+    return hashlib.sha256(master + b"blind-index").digest() #separate hash
+
+def normalize_for_index(value: str) -> str:
+    if not value:
+        return ""
+    return "".join(ch for ch in value.lower() if ch.isalnum())
+
+def blind_index(value: str) -> str:
+    if not value:
+        return value
+    key = get_blind_index_key()
+    normalized = normalize_for_index(value)
+
+    return hmac.new(key, normalized.encode(), hashlib.sha256).hexdigest()
