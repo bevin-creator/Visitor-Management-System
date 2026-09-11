@@ -12,7 +12,7 @@ from app.schemas.visitor import VisitorCreate, VisitorResponse
 from app.services.audit import log_action
 from app.routers.auth import get_current_user, require_role
 
-from app.services.encryption import encrypt_field, decrypt_field
+from app.services.encryption import encrypt_field, decrypt_field, blind_index
 
 router = APIRouter()
 
@@ -29,11 +29,14 @@ async def list_visitors(
 
     if search:
         search_filter = f"%{search}%"
+        search_bidx = blind_index(search)
         query = query.filter(
             Visitor.full_name.ilike(search_filter)
             | Visitor.email.ilike(search_filter)
-            | Visitor.phone.ilike(search_filter)
+            | (Visitor.phone_bidx == search_bidx)
+            | (Visitor.id_number_bidx == search_bidx)
         )
+
     visitors = query.offset(skip).limit(limit).all()
 
     #decrypt
@@ -56,8 +59,10 @@ async def create_visitor(
 
     #encrypt before saving
     if visitor.phone:
+        visitor.phone_bidx = blind_index(visitor.phone)
         visitor.phone = encrypt_field(visitor.phone)
     if visitor.id_number:
+        visitor.id_number_bidx = blind_index(visitor.id_number)
         visitor.id_number = encrypt_field(visitor.id_number)
 
     db.add(visitor)
@@ -113,8 +118,21 @@ async def update_visitor(
     for key, value in visitor_data.model_dump().items():
         setattr(visitor, key, value)
 
+    if visitor.phone:
+        visitor.phone_bidx = blind_index(visitor.phone)
+        visitor.phone = encrypt_field(visitor.phone)
+    if visitor.id_number:
+        visitor.id_number_bidx = blind_index(visitor.id_number)
+        visitor.id_number = encrypt_field(visitor.id_number)
+
     db.commit()
     db.refresh(visitor)
+
+    if visitor.phone:
+        visitor.phone = decrypt_field(visitor.phone)
+    if visitor.id_number:
+        visitor.id_number = decrypt_field(visitor.id_number)    
+
     return visitor
 
 #Delete visitor (require admin role)
