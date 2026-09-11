@@ -19,6 +19,8 @@ class VisitorResponse(BaseModel):
     email: str
     phone: str
     company: Optional[str]= None
+    id_type: Optional[str] = None
+    id_number: Optional[str] = None
     created_at: datetime
 
     class Config:
