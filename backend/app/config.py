@@ -22,6 +22,12 @@ class Settings(BaseSettings):
     
     ENCRYPTION_KEY: str = "generate-key"
 
+    #first admin bootstrap
+    ADMIN_USERNAME: str = ""
+    ADMIN_PASSWORD: str = ""
+    ADMIN_EMAIL: str = ""
+    ADMIN_FULL_NAME: str = "System Admin"
+
     @field_validator("DATABASE_URL")
     @classmethod
     def normalize_db_url(cls, v: str) -> str:
