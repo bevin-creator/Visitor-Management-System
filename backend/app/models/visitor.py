@@ -15,9 +15,11 @@ class Visitor(Base):
     full_name: Mapped[str]=mapped_column(String(100), index=True)
     email: Mapped[str]= mapped_column(String(100), nullable=True, index=True)
     phone: Mapped[str]=mapped_column(String(20))
+    phone_bidx: Mapped[Optional[str]]=mapped_column(String(64), nullable=True, index=True)
     company: Mapped[Optional[str]]=mapped_column(String(100), nullable=True)
     id_type: Mapped[Optional[str]]=mapped_column(String(50), nullable=True)
     id_number: Mapped[Optional[str]]=mapped_column(String(50), nullable=True)
+    id_number_bidx: Mapped[Optional[str]]=mapped_column(String(64), nullable=True, index=True)
 
     #timespamps and r/ship
     created_at: Mapped[datetime]=mapped_column(DateTime, server_default=func.now())
