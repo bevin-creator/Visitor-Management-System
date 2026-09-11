@@ -33,6 +33,7 @@
                 <input type="date" id="end_date" required>
 
                 <button type="submit">Generate Report</button>
+                <button type="button" id="download-pdf-btn">Download PDF (All Records)</button>
             </form>
 
             <div id="report-results" style="display:none; margin-top:1.5rem;">
@@ -102,6 +103,42 @@
             }
 
             resultsE1.style.display="block";
+        });
+
+        //Download full-records PDF. Uses date range if provided, else all records.
+        document.getElementById("download-pdf-btn").addEventListener("click", async () => {
+            const errorE1 = document.getElementById("report-error");
+            errorE1.textContent = "";
+
+            const startDate = document.getElementById("start_date").value;
+            const endDate = document.getElementById("end_date").value;
+
+            let endpoint = "/reports/export/pdf";
+            if (startDate && endDate) {
+                endpoint += `?start_date=${startDate}&end_date=${endDate}`;
+            }
+
+            const response = await apiRequest(endpoint);
+            if (!response) return;
+
+            if (response.status === 403) {
+                errorE1.textContent = "Access denied. Reports are for admins and managers only!";
+                return;
+            }
+            if (!response.ok) {
+                errorE1.textContent = "Failed to generate PDF.";
+                return;
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "visitor_report.pdf";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
         });
 
         document.getElementById("logout-btn").addEventListener("click", (e)=>{
