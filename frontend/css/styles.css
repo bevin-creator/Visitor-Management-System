@@ -330,3 +330,47 @@ main.form-page {
     max-width: 900px;
     align-items: start;
 }
+
+/*Mobile responsiveness*/
+@media (max-width: 768px) {
+    html, body {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    /* single column on mobile for all layouts
+    (override main.form-page which is 2fr 1fr) */
+    main,
+    main.form-page {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+        gap: 1rem;
+        max-width: 100%;
+    }
+
+    header h1 {
+        font-size: 1.3rem;
+    }
+
+    /* dashboard metric cards stack instead of 3 across */
+    .stats {
+        grid-template-columns: 1fr;
+    }
+
+    section {
+        overflow-x: auto;
+    }
+
+    table {
+        min-width: 560px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-box {
+        margin: 10% 1rem;
+        max-width: none;
+    }
+}
