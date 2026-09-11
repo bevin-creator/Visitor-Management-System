@@ -14,11 +14,11 @@ class Visitor(Base):
     id: Mapped[int]= mapped_column(primary_key=True, index=True)
     full_name: Mapped[str]=mapped_column(String(100), index=True)
     email: Mapped[str]= mapped_column(String(100), nullable=True, index=True)
-    phone: Mapped[str]=mapped_column(String(20))
+    phone: Mapped[str]=mapped_column(Text)
     phone_bidx: Mapped[Optional[str]]=mapped_column(String(64), nullable=True, index=True)
     company: Mapped[Optional[str]]=mapped_column(String(100), nullable=True)
     id_type: Mapped[Optional[str]]=mapped_column(String(50), nullable=True)
-    id_number: Mapped[Optional[str]]=mapped_column(String(50), nullable=True)
+    id_number: Mapped[Optional[str]]=mapped_column(Text, nullable=True)
     id_number_bidx: Mapped[Optional[str]]=mapped_column(String(64), nullable=True, index=True)
 
     #id verification, defaults to not_configured until the api var is set, doesnt block anything
