@@ -17,9 +17,10 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256" #symmetric
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
-    #CORS for frontend origin
-    CORS_ORIGINS:list[str]= ["http://localhost:5500", "http://127.0.0.1:5500"]
-    
+    #CORS for frontend origin. Stored as a comma-separated string so it can be
+    #supplied via a plain env var; use cors_origins_list to get the parsed list.
+    CORS_ORIGINS: str = "http://localhost:5500,http://127.0.0.1:5500"
+
     ENCRYPTION_KEY: str = "generate-key"
 
     #id verification api (optional), leave blank to keep it off, returns not_configured then
@@ -41,13 +42,10 @@ class Settings(BaseSettings):
             return v.replace("postgres://", "postgresql://", 1)
         return v
 
-    @field_validator("CORS_ORIGINS", mode="before")
-    @classmethod
-    def split_cors(cls, v):
-        # Allow a comma-separated string from an env var
-        if isinstance(v, str):
-            return [origin.strip() for origin in v.split(",") if origin.strip()]
-        return v
+    @property
+    def cors_origins_list(self) -> list[str]:
+        # Split the comma-separated CORS_ORIGINS string into a clean list
+        return [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
 
     class Config:
         env_file=".env"
