@@ -22,46 +22,56 @@
         </ul>
     </nav>
 
-    <main>
-        <section id="registration">
+    <main class="form-page">
+        <section id="registration" class="form-card">
             <h2>Visitor Registration & Check-In</h2>
             <form id="register-form">
-                <label for="full_name">Full Name:</label>
-                <input type="text" id="full_name" name="full_name" required>
-
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required>
-
-                <label for="phone">Phone Number:</label>
-                <input type="tel" id="phone" name="phone" required>
-
-                <label for="id_type">ID Type:</label>
-                <select id="id_type" name="id_type">
-                    <option value="">--- None ---</option>
-                    <option value="national_id">National ID</option>
-                    <option value="passport">Passport</option>
-                    <option value="drivers_license">Driver's License</option>
-                </select>
-
-                <label for="id_number">ID Number:</label>
-                <input type="text" id="id_number" name="id_number">
-
-                <label for="purpose">Purpose of Visit:</label>
-                <select id="purpose" name="purpose" required>
-                    <option value="">--- Select Purpose ---</option>
-                    <option value="meeting">Meeting</option>
-                    <option value="delivery">Delivery</option>
-                    <option value="interview">Interview</option>
-                    <option value="maintenance">Maintenance</option>
-                    <option value="other">Other</option>
-                </select>
-
-                <label for="host_name">Host (Person to visit):</label>
-                <input type="text" id="host_name" name="host_name" required>
-
-                <label for="host_department">Department:</label>
-                <input type="text" id="host_department" name="host_department">
-
+                <div class="form-grid">
+                    <div class="full-width">
+                        <label for="full_name">Full Name:</label>
+                        <input type="text" id="full_name" name="full_name" required>
+                    </div>
+                    <div>
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div>
+                        <label for="phone">Phone Number:</label>
+                        <input type="tel" id="phone" name="phone" required>
+                    </div>
+                    <div>
+                        <label for="id_type">ID Type:</label>
+                        <select id="id_type" name="id_type">
+                            <option value="">--- None ---</option>
+                            <option value="national_id">National ID</option>
+                            <option value="passport">Passport</option>
+                            <option value="drivers_license">Driver's License</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="id_number">ID Number:</label>
+                        <input type="text" id="id_number" name="id_number">
+                    </div>
+                    <div>
+                        <label for="purpose">Purpose of Visit:</label>
+                        <select id="purpose" name="purpose" required>
+                            <option value="">--- Select Purpose ---</option>
+                            <option value="meeting">Meeting</option>
+                            <option value="delivery">Delivery</option>
+                            <option value="interview">Interview</option>
+                            <option value="maintenance">Maintenance</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="host_name">Host (Person to visit):</label>
+                        <input type="text" id="host_name" name="host_name" required>
+                    </div>
+                    <div>
+                        <label for="host_department">Department:</label>
+                        <input type="text" id="host_department" name="host_department">
+                    </div>
+                </div>
                 <button type="submit">Register & Check In</button>
                 <p id="form-message" class="error"></p>
             </form>

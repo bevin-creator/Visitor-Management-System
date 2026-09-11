@@ -293,3 +293,40 @@ main.auth-main section {
     font-size: 0.85rem;
     opacity: 0.85;
 }
+
+.form-card form {
+    width: 100%;
+}
+
+/* two-column field grid to reduce vertical scrolling on long forms */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem 1rem;
+}
+
+.form-grid > div {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-grid label {
+    margin-top: 0.5rem;
+}
+
+/* let a field span the full width of the two-column grid */
+.form-grid .full-width {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 600px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+main.form-page {
+    grid-template-columns: 2fr 1fr;
+    max-width: 900px;
+    align-items: start;
+}
