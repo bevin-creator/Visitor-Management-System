@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VMS - Manage Users</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Visitor Management System</h1>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="visitors.html">Visitors</a></li>
+            <li><a href="register.html">Register</a></li>
+            <li><a href="reports.html">Reports</a></li>
+            <li><a href="users.html" id="users-link">Users</a></li>
+            <li><a href="#" id="logout-btn">Logout</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="create-user">
+            <h2>Create User</h2>
+            <form id="create-user-form">
+                <label for="full_name">Full Name:</label>
+                <input type="text" id="full_name" required>
+
+                <label for="username">Username:</label>
+                <input type="text" id="username" required>
+
+                <label for="email">Email:</label>
+                <input type="email" id="email" required>
+
+                <label for="password">Password:</label>
+                <input type="password" id="password" required minlength="6">
+
+                <label for="role">Role:</label>
+                <select id="role" required>
+                    <option value="">--- Select Role ---</option>
+                    <option value="admin">Admin</option>
+                    <option value="manager">Manager</option>
+                    <option value="guard">Guard</option>
+                </select>
+
+                <button type="submit">Create User</button>
+                <p id="form-message" class="error"></p>
+            </form>
+        </section>
+
+        <aside>
+            <h3>Note</h3>
+            <p>Only admins can create users. Choose the role carefully — it controls what the user can access.</p>
+        </aside>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Visitor Management System. All rights reserved.</p>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script>
+        requireAuth();
+
+        // This page is admin-only. Non-admins get bounced to the dashboard.
+        if (getUserRole() !== "admin") {
+            window.location.href = "index.html";
+        }
+
+        document.getElementById("create-user-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const messageEl = document.getElementById("form-message");
+            messageEl.style.color = "red";
+            messageEl.textContent = "";
+
+            const body = {
+                full_name: document.getElementById("full_name").value,
+                username: document.getElementById("username").value,
+                email: document.getElementById("email").value,
+                password: document.getElementById("password").value,
+                role: document.getElementById("role").value,
+            };
+
+            const response = await apiRequest("/auth/register", "POST", body);
+            if (response && response.ok) {
+                const user = await response.json();
+                messageEl.style.color = "green";
+                messageEl.textContent = `User ${user.username} (${user.role}) created.`;
+                document.getElementById("create-user-form").reset();
+            } else if (response) {
+                let detail = "Failed to create user.";
+                try {
+                    const err = await response.json();
+                    if (err.detail) detail = err.detail;
+                } catch (_) {}
+                messageEl.textContent = detail;
+            }
+        });
+
+        document.getElementById("logout-btn").addEventListener("click", (e) => {
+            e.preventDefault();
+            clearToken();
+            window.location.href = "login.html";
+        });
+    </script>
+</body>
+</html>

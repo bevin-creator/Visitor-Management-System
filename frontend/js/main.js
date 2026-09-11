@@ -88,4 +88,8 @@ function applyRoleVisibility(){
         const reportsLink = document.querySelector('a[href="reports.html"]');
         if(reportsLink) reportsLink.parentElement.style.display = "none";
     }
+    if(role !== "admin"){
+        const usersLink = document.querySelector('a[href="users.html"]');
+        if(usersLink) usersLink.parentElement.style.display = "none";
+    }
 }
