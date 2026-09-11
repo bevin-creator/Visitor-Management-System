@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset= "UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VMS - Dashboard</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Visitor Management System</h1>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="visitors.html">Visitors</a></li>
+            <li><a href="register.html">Register</a></li>
+            <li><a href="reports.html">Reports</a></li>
+            <li><a href="users.html">Users</a></li>
+            <li><a href="#" id="logout-btn">Logout</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="dashboard">
+            <h2>Dashboard</h2>
+            <div class="stats">
+                <div class="stat-card">
+                    <h3>Today</h3>
+                    <p id="visitors-today">0</p>
+
+                </div>
+                <div class="stat-card">
+                    <h3>Currently In</h3>
+                    <p id="checked-in">0</p>
+
+                </div>
+                <div class="stat-card">
+                    <h3>This Week</h3>
+                    <p id="visitors-week">0</p>
+
+                </div>
+
+            </div>
+        </section>
+
+        <aside>
+            <h3>Quick Actions</h3>
+            <div class="action-cards">
+                <a href="register.html" class="action-card">
+                    <span class="action-card-title">Register New Visitor</span>
+                    <span class="action-card-desc">Add and check in a visitor</span>
+                </a>
+                <a href="visitors.html" class="action-card">
+                    <span class="action-card-title">View All Visitors</span>
+                    <span class="action-card-desc">See active visitors and search</span>
+                </a>
+            </div>
+        </aside>
+
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Visitor Management System. All rights reserved.</p>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script>
+        requireAuth();
+        applyRoleVisibility();
+
+        //load dashboard metrics
+        async function loadDashboard() {
+            const response = await apiRequest("/dashboard/metrics");
+            
+            if(response && response.ok){
+                const data = await response.json();
+                document.getElementById("visitors-today").textContent = data.visitors_today;
+                document.getElementById("checked-in").textContent=data.currently_checked_in;
+                document.getElementById("visitors-week").textContent=data.visitors_this_week;
+
+            }
+        }
+        //logout
+        document.getElementById("logout-btn").addEventListener("click", (e)=>{
+            e.preventDefault();
+            clearToken();
+            window.location.href="login.html";
+        });
+
+        loadDashboard();
+
+    </script>
+
+</body>
+</html>

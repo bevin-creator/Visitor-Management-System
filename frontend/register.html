@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VMS - Registration</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Visitor Management System</h1>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html">Dashboard</a></li>
+            <li><a href="visitors.html">Visitors</a></li>
+            <li><a href="register.html">Register</a></li>
+            <li><a href="reports.html">Reports</a></li>
+            <li><a href="users.html">Users</a></li>
+            <li><a href="#" id="logout-btn">Logout</a></li>
+        </ul>
+    </nav>
+
+    <main class="form-page">
+        <section id="registration" class="form-card">
+            <h2>Visitor Registration & Check-In</h2>
+            <form id="register-form">
+                <div class="form-grid">
+                    <div class="full-width">
+                        <label for="full_name">Full Name:</label>
+                        <input type="text" id="full_name" name="full_name" required>
+                    </div>
+                    <div>
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div>
+                        <label for="phone">Phone Number:</label>
+                        <input type="tel" id="phone" name="phone" required>
+                    </div>
+                    <div>
+                        <label for="id_type">ID Type:</label>
+                        <select id="id_type" name="id_type">
+                            <option value="">--- None ---</option>
+                            <option value="national_id">National ID</option>
+                            <option value="passport">Passport</option>
+                            <option value="drivers_license">Driver's License</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="id_number">ID Number:</label>
+                        <input type="text" id="id_number" name="id_number">
+                    </div>
+                    <div>
+                        <label for="purpose">Purpose of Visit:</label>
+                        <select id="purpose" name="purpose" required>
+                            <option value="">--- Select Purpose ---</option>
+                            <option value="meeting">Meeting</option>
+                            <option value="delivery">Delivery</option>
+                            <option value="interview">Interview</option>
+                            <option value="maintenance">Maintenance</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="host_name">Host (Person to visit):</label>
+                        <input type="text" id="host_name" name="host_name" required>
+                    </div>
+                    <div>
+                        <label for="host_department">Department:</label>
+                        <input type="text" id="host_department" name="host_department">
+                    </div>
+                </div>
+                <button type="submit">Register & Check In</button>
+                <p id="form-message" class="error"></p>
+            </form>
+        </section>
+
+        <aside>
+            <h3>Instructions</h3>
+            <p>Fill in visitor details. They will be registered and checked in automatically.</p>
+        </aside>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Visitor Management System. All rights reserved.</p>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script>
+        requireAuth();
+        applyRoleVisibility();
+
+        document.getElementById("register-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const messageEl = document.getElementById("form-message");
+            messageEl.textContent = "";
+            messageEl.style.color = "red";
+
+            //1. Create the visitor
+            const visitorData = {
+                full_name: document.getElementById("full_name").value,
+                email: document.getElementById("email").value,
+                phone: document.getElementById("phone").value,
+                id_type: document.getElementById("id_type").value || null,
+                id_number: document.getElementById("id_number").value || null,
+            };
+
+            const visitorResponse = await apiRequest("/visitors/", "POST", visitorData);
+            if (!visitorResponse || !visitorResponse.ok) {
+                messageEl.textContent = "Failed to register visitor.";
+                return;
+            }
+
+            const visitor = await visitorResponse.json();
+
+            //2. Check them in
+            const checkinData = {
+                visitor_id: visitor.id,
+                purpose: document.getElementById("purpose").value,
+                host_name: document.getElementById("host_name").value,
+                host_department: document.getElementById("host_department").value || null,
+            };
+
+            const checkinResponse = await apiRequest("/checkin/", "POST", checkinData);
+            if (checkinResponse && checkinResponse.ok) {
+                messageEl.style.color = "green";
+                messageEl.textContent = `${visitor.full_name} registered and checked in successfully!`;
+                document.getElementById("register-form").reset();
+            } else {
+                messageEl.textContent = "Visitor registered but check-in failed.";
+            }
+        });
+
+        //Logout
+        document.getElementById("logout-btn").addEventListener("click", (e) => {
+            e.preventDefault();
+            clearToken();
+            window.location.href = "login.html";
+        });
+    </script>
+</body>
+</html>
