@@ -257,3 +257,39 @@ main.auth-main section {
     border-radius: 8px;
     border: 1px solid #2e7d32;
 }
+
+.action-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.action-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    background-color: #ffffff;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid #2e7d32;
+    text-decoration: none;
+    color: #1a1a1a;
+    transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.action-card:hover {
+    background-color: #2e7d32;
+    color: #FFF8E7;
+    transform: translateY(-2px);
+}
+
+.action-card-title {
+    font-weight: bold;
+    font-size: 1.05rem;
+}
+
+.action-card-desc {
+    font-size: 0.85rem;
+    opacity: 0.85;
+}
