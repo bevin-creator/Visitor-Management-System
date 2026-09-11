@@ -46,10 +46,47 @@
         </section>
 
         <aside>
-            <h3>Filter</h3>
-            <p>Use search to find visitors</p>
+            <h3>Search Visitors</h3>
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Search" />
+                <button type="button" id="search-btn">Search</button>
+                <button type="button" id="clear-search-btn">Clear</button>
+            </div>
+            <div id="search-results"></div>
         </aside>
 
+        <div id="edit-modal" class="modal-overlay">
+            <div class="modal-box">
+                <h3>Edit Visitor</h3>
+                <form id="edit-form">
+                    <input type="hidden" id="edit-visitor-id" />
+
+                    <label for="edit-full_name">Full Name:</label>
+                    <input type="text" id="edit-full_name" required />
+
+                    <label for="edit-email">Email:</label>
+                    <input type="email" id="edit-email" required />
+
+                    <label for="edit-phone">Phone Number:</label>
+                    <input type="tel" id="edit-phone" required />
+
+                    <label for="edit-id_type">ID Type:</label>
+                    <select id="edit-id_type">
+                        <option value="">--- None ---</option>
+                        <option value="national_id">National ID</option>
+                        <option value="passport">Passport</option>
+                        <option value="drivers_license">Driver's License</option>
+                    </select>
+
+                    <label for="edit-id_number">ID Number:</label>
+                    <input type="text" id="edit-id_number" />
+
+                    <button type="submit">Save</button>
+                    <button type="button" id="edit-cancel-btn" class="btn-action" style="margin-top:0.5rem;">Cancel</button>
+                    <p id="edit-message" class="error"></p>
+                </form>
+            </div>
+        </div>
     </main>
 
     <footer>
@@ -93,8 +130,9 @@
                     <td>${visit.host_name}</td>
                     <td>${checkInTime}</td>
                     <td>
-                        <button onclick="checkOut(${visit.id})">Check Out</button>
-                        ${getUserRole() === "admin" ? `<button onclick="deleteVisitor(${visit.visitor_id})" style="background:red;color:white;margin-left:0.5rem;">Delete</button>` : ""}
+                        <button class="btn-action" onclick="checkOut(${visit.id})">Check Out</button>
+                        ${getUserRole() === "admin" ? `<button class="btn-action" onclick="openEdit(${visit.visitor_id})">Edit</button>` : ""}
+                        ${getUserRole() === "admin" ? `<button class="btn-action btn-danger" onclick="deleteVisitor(${visit.visitor_id})">Delete</button>` : ""}
                     </td>
                 `;
                 tbody.appendChild(row);
@@ -133,6 +171,99 @@
             clearToken();
             window.location.href = "login.html";
         });
+
+        //search
+        async function searchVisitors() {
+            const term = document.getElementById("search-input").value.trim();
+            const resultsDiv = document.getElementById("search-results");
+
+            if (!term) {
+                resultsDiv.innerHTML = "<p>Enter a search term.</p>";
+                return;
+            }
+
+            const response = await apiRequest(`/visitors/?search=${encodeURIComponent(term)}`);
+            if (!response || !response.ok) {
+                resultsDiv.innerHTML = "<p>Search failed.</p>";
+                return;
+            }
+
+            const visitors = await response.json();
+            if (visitors.length === 0) {
+                resultsDiv.innerHTML = "<p>No matching visitors.</p>";
+                return;
+            }
+
+            const isAdmin = getUserRole() === "admin";
+            let html = "<table><thead><tr><th>Name</th><th>Phone</th>" + (isAdmin ? "<th>Action</th>" : "") + "</tr></thead><tbody>";
+            for (const v of visitors) {
+                html += `<tr>
+                    <td>${v.full_name}</td>
+                    <td>${v.phone}</td>
+                    ${isAdmin ? `<td><button class="btn-action" onclick="openEdit(${v.id})">Edit</button></td>` : ""}
+                </tr>`;
+            }
+            html += "</tbody></table>";
+            resultsDiv.innerHTML = html;
+        }
+
+        document.getElementById("search-btn").addEventListener("click", searchVisitors);
+        document.getElementById("search-input").addEventListener("keydown", (e) => {
+            if (e.key === "Enter") searchVisitors();
+        });
+        document.getElementById("clear-search-btn").addEventListener("click", () => {
+            document.getElementById("search-input").value = "";
+            document.getElementById("search-results").innerHTML = "";
+        });
+
+        //Edit visitor (admin only)
+        async function openEdit(visitorId) {
+            const response = await apiRequest(`/visitors/${visitorId}`);
+            if (!response || !response.ok) {
+                alert("Could not load visitor.");
+                return;
+            }
+            const v = await response.json();
+
+            document.getElementById("edit-visitor-id").value = v.id;
+            document.getElementById("edit-full_name").value = v.full_name || "";
+            document.getElementById("edit-email").value = v.email || "";
+            document.getElementById("edit-phone").value = v.phone || "";
+            document.getElementById("edit-id_type").value = v.id_type || "";
+            document.getElementById("edit-id_number").value = v.id_number || "";
+            document.getElementById("edit-message").textContent = "";
+
+            document.getElementById("edit-modal").style.display = "block";
+        }
+
+        document.getElementById("edit-cancel-btn").addEventListener("click", () => {
+            document.getElementById("edit-modal").style.display = "none";
+        });
+
+        document.getElementById("edit-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const id = document.getElementById("edit-visitor-id").value;
+            const messageEl = document.getElementById("edit-message");
+            messageEl.style.color = "red";
+
+            const body = {
+                full_name: document.getElementById("edit-full_name").value,
+                email: document.getElementById("edit-email").value,
+                phone: document.getElementById("edit-phone").value,
+                id_type: document.getElementById("edit-id_type").value || null,
+                id_number: document.getElementById("edit-id_number").value || null,
+            };
+
+            const response = await apiRequest(`/visitors/${id}`, "PUT", body);
+            if (response && response.ok) {
+                document.getElementById("edit-modal").style.display = "none";
+                loadActiveVisitors();
+                if (document.getElementById("search-input").value.trim()) searchVisitors();
+            } else {
+                messageEl.textContent = "Update failed.";
+            }
+        });
+
 
         loadActiveVisitors();
     </script>
