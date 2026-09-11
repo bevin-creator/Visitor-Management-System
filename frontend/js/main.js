@@ -1,6 +1,13 @@
 // API conf
-const API_BASE= "http://localhost:8000/api/v1";
-
+const API_BASE = (function () {
+    if (window.API_BASE_OVERRIDE) return window.API_BASE_OVERRIDE;
+    const host = window.location.hostname;
+    if (host === "localhost" || host === "127.0.0.1") {
+        return "http://localhost:8000/api/v1";
+    }
+    // Production backend on Render
+    return "https://vms-backend.onrender.com/api/v1";
+}) ();
 //store token 
 function saveToken(token) {
     localStorage.setItem("access_token", token);

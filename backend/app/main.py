@@ -6,6 +6,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.routers import auth, visitors, checkin, reports, dashboard
 
+from app.database import Base, engine
+from app import models  
+
+Base.metadata.create_all(bind=engine)
+
 app = FastAPI(
     title = "Visitor Management System",
     description = "API form managing visitor registration, check-in/out and reporting",

@@ -2,6 +2,7 @@
 # Loads values from .env file
 
 from pydantic_settings import BaseSettings
+from pydantic import field_validator
 
 class Settings(BaseSettings):
     #App metadata
@@ -20,6 +21,22 @@ class Settings(BaseSettings):
     CORS_ORIGINS:list[str]= ["http://localhost:5500", "http://127.0.0.1:5500"]
     
     ENCRYPTION_KEY: str = "generate-key"
+
+    @field_validator("DATABASE_URL")
+    @classmethod
+    def normalize_db_url(cls, v: str) -> str:
+        # postgres:// to postgresql:// for SQLAlchemy
+        if v.startswith("postgres://"):
+            return v.replace("postgres://", "postgresql://", 1)
+        return v
+
+    @field_validator("CORS_ORIGINS", mode="before")
+    @classmethod
+    def split_cors(cls, v):
+        # Allow a comma-separated string from an env var
+        if isinstance(v, str):
+            return [origin.strip() for origin in v.split(",") if origin.strip()]
+        return v
 
     class Config:
         env_file=".env"
