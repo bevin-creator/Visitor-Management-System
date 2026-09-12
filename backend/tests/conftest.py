@@ -13,6 +13,8 @@ import pytest
 from app.main import app
 from app.database import Base, get_db
 
+from app.routers.auth import get_password_hash
+
 
 TEST_DATABASE_URL = "sqlite://"
 
@@ -68,3 +70,20 @@ def client(db_session):
         yield test_client
 
     app.dependency_overrides.clear()
+
+@pytest.fixture
+def admin_user(db_session):
+    user = User(
+        username="admin",
+        email="admin@example.com",
+        hashed_password=get_password_hash("TestPass123!"),
+        full_name="Test Administrator",
+        role="admin",
+        is_active=True,
+    )
+
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
+
+    return user

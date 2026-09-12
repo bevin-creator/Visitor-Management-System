@@ -17,3 +17,53 @@ def test_wrong_password_fails():
     hashed = get_password_hash(password)
 
     assert verify_password("WrongPassword", hashed) is False
+
+#successful login test
+
+def test_login_success(client, admin_user):
+    response = client.post(
+        "/api/v1/auth/login",
+        data={
+            "username": "admin",
+            "password": "TestPass123!",
+        },
+    )
+
+    assert response.status_code == 200
+
+    body = response.json()
+
+    assert body["access_token"]
+    assert body["token_type"] == "bearer"
+    assert body["role"] == "admin"
+    assert body["username"] == "admin"
+
+#incorrect login test
+def test_login_wrong_password(client, admin_user):
+    response = client.post(
+        "/api/v1/auth/login",
+        data={
+            "username": "admin",
+            "password": "WrongPassword!",
+        },
+    )
+
+    assert response.status_code == 401
+
+#test nonexistent user
+def test_login_unknown_user(client):
+    response = client.post(
+        "/api/v1/auth/login",
+        data={
+            "username": "doesnotexist",
+            "password": "Anything123!",
+        },
+    )
+
+    assert response.status_code == 401
+
+#test protected endpoint
+def test_me_requires_authentication(client):
+    response = client.get("/api/v1/auth/me")
+
+    assert response.status_code == 401
