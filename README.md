@@ -170,4 +170,3 @@ Guard: ID number hidden
 
 The system provides a digital alternative to manual visitor logbooks while improving security, accountability, privacy and visitor tracking.
 
-
