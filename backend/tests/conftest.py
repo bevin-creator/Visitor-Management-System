@@ -162,3 +162,15 @@ def guard_user(db_session):
         username="guard",
         role="guard",
     )
+
+#visitor fixture 
+@pytest.fixture
+def visitor_payload():
+    return {
+        "full_name": "Visitor One",
+        "email": "visitor1@example.com",
+        "phone": "+254700123456",
+        "company": "Example Ltd",
+        "id_type": "National ID",
+        "id_number": "12345678",
+    }
