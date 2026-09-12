@@ -71,6 +71,8 @@ def client(db_session):
 
     app.dependency_overrides.clear()
 
+'''
+#admin creation helper
 @pytest.fixture
 def admin_user(db_session):
     user = User(
@@ -87,7 +89,7 @@ def admin_user(db_session):
     db_session.refresh(user)
 
     return user
-
+'''
 #reusable login helper
 @pytest.fixture
 def auth_header():
@@ -110,3 +112,53 @@ def auth_header():
         }
 
     return make_header
+
+#user creation helper 
+def create_test_user(
+    db_session,
+    username,
+    role,
+    password="TestPass123!",
+    email=None,
+    is_active=True,
+):
+    user = User(
+        username=username,
+        email=email or f"{username}@example.com",
+        hashed_password=get_password_hash(password),
+        full_name=f"{role.title()} Test User",
+        role=role,
+        is_active=is_active,
+    )
+
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
+
+    return user
+
+@pytest.fixture
+def admin_user(db_session):
+    return create_test_user(
+        db_session,
+        username="admin",
+        role="admin",
+    )
+
+
+@pytest.fixture
+def manager_user(db_session):
+    return create_test_user(
+        db_session,
+        username="manager",
+        role="manager",
+    )
+
+
+@pytest.fixture
+def guard_user(db_session):
+    return create_test_user(
+        db_session,
+        username="guard",
+        role="guard",
+    )
