@@ -170,3 +170,52 @@ Guard: ID number hidden
 
 The system provides a digital alternative to manual visitor logbooks while improving security, accountability, privacy and visitor tracking.
 
+## Testing
+
+The backend includes automated tests using **pytest** for authentication, RBAC, encryption, visitor management, blind-index search, check-in/check-out workflows, reporting, audit logging, and security regression cases.
+
+### Run the Tests
+
+From the `backend` directory:
+
+```bash
+pip install -r requirements.txt
+pip install pytest
+pytest -v
+```
+
+For a summary including expected failures:
+
+```bash
+pytest -ra
+```
+
+To run a specific test file:
+
+```bash
+pytest -v tests/test_visitors.py
+```
+
+The test suite is located in:
+
+```text
+backend/tests/
+```
+
+and includes:
+
+```text
+test_database.py
+test_encryption.py
+test_auth.py
+test_user_management.py
+test_rbac.py
+test_visitors.py
+test_workflow.py
+test_reports_dashboard_audit.py
+test_security_regressions.py
+```
+
+Tests marked **XFAIL** represent known security or implementation limitations that are intentionally retained as regression tests.
+
+The tests use an isolated SQLite test database configured in `tests/conftest.py` and do not require the development PostgreSQL database.
