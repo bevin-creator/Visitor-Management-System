@@ -87,3 +87,26 @@ def admin_user(db_session):
     db_session.refresh(user)
 
     return user
+
+#reusable login helper
+@pytest.fixture
+def auth_header():
+
+    def make_header(client, username, password="TestPass123!"):
+        response = client.post(
+            "/api/v1/auth/login",
+            data={
+                "username": username,
+                "password": password,
+            },
+        )
+
+        assert response.status_code == 200
+
+        token = response.json()["access_token"]
+
+        return {
+            "Authorization": f"Bearer {token}"
+        }
+
+    return make_header
