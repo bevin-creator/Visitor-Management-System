@@ -15,6 +15,8 @@ from app.routers.auth import get_current_user, require_role
 
 from app.services.encryption import encrypt_field, decrypt_field, blind_index
 from app.services import id_verification
+from app.services.masking import mask_id_number, mask_phone
+
 
 router = APIRouter()
 
@@ -41,12 +43,14 @@ async def list_visitors(
 
     visitors = query.offset(skip).limit(limit).all()
 
+    db.expunge_all() #Cut session on all objects
+
     #decrypt
     for v in visitors:
         if v.phone:
-            v.phone = decrypt_field(v.phone)
+            v.phone = mask_phone(decrypt_field(v.phone), current_user.role)
         if v.id_number:
-            v.id_number = decrypt_field(v.id_number)
+            v.id_number = mask_id_number(decrypt_field(v.id_number), current_user.role)
 
     return visitors
 
@@ -80,13 +84,16 @@ async def create_visitor(
     db.commit()
     db.refresh(visitor)
 
-    if visitor.phone:
-        visitor.phone = decrypt_field(visitor.phone)
-    if visitor.id_number:
-        visitor.id_number = decrypt_field(visitor.id_number)
-
     #auditlogging via audit service
     log_action(db, action="create", resource_type="visitor", user_id=current_user.id, resource_id=visitor.id, details=f"Registered visitor {visitor.full_name} (id verification: {visitor.verification_status})")
+
+    db.expunge(visitor)# cut session not to overwrite
+
+    if visitor.phone:
+        visitor.phone =mask_phone(decrypt_field(visitor.phone), current_user.role)
+    if visitor.id_number:
+        visitor.id_number = mask_id_number(decrypt_field(visitor.id_number), current_user.role)
+
 
 
     return visitor
@@ -104,10 +111,12 @@ async def get_visitor(
     if not visitor:
         raise HTTPException(status_code=404, detail="Visitor not found")
 
+    db.expunge(visitor)# cut session
+
     if visitor.phone:
-        visitor.phone = decrypt_field(visitor.phone)
+        visitor.phone = mask_phone(decrypt_field(visitor.phone), current_user.role)
     if visitor.id_number:
-        visitor.id_number = decrypt_field(visitor.id_number)
+        visitor.id_number = mask_id_number(decrypt_field(visitor.id_number), current_user.role)
 
     return visitor
 
@@ -139,10 +148,12 @@ async def update_visitor(
     db.commit()
     db.refresh(visitor)
 
+    db.expunge(visitor)
+
     if visitor.phone:
-        visitor.phone = decrypt_field(visitor.phone)
+        visitor.phone = mask_phone(decrypt_field(visitor.phone), current_user.role)
     if visitor.id_number:
-        visitor.id_number = decrypt_field(visitor.id_number)    
+        visitor.id_number = mask_id_number(decrypt_field(visitor.id_number), current_user.role)
 
     return visitor
 
@@ -160,13 +171,15 @@ async def delete_visitor(
     if not visitor:
         raise HTTPException(status_code=404, detail="Visitor not found")
 
+    visitor_name=visitor.full_name
+
     #remove all visit records for the visitor first
     db.query(VisitRecord).filter(VisitRecord.visitor_id == visitor_id).delete()
     db.delete(visitor)
     db.commit()
 
     #audit logging
-    log_action(db, action="delete", resource_type="visitor", user_id=current_user.id, resource_id=visitor_id, details=f"Deleted visitor {visitor.full_name} and all visit records")
+    log_action(db, action="delete", resource_type="visitor", user_id=current_user.id, resource_id=visitor_id, details=f"Deleted visitor {visitor_name} and all visit records")
 
     return None
 
